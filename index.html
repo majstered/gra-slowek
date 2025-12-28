@@ -1,1 +1,525 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Gra Słówek</title>
+<link rel="icon" href="favicon.ico">
+<link rel="apple-touch-icon" href="icon-192.png">
 
+<style>
+html,body{margin:0;padding:0;height:100%;overflow:hidden;font-family:system-ui,sans-serif;
+background:radial-gradient(circle at top,#fff6d8,#f1deb0)}
+
+#menu{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:30px}
+.card{background:#fffaf0;padding:30px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.15);text-align:center;font-weight:900;max-width:320px;width:90%}
+h1{margin:0 0 20px;font-size:28px}
+.btnGrid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:20px}
+.btnBig{padding:18px;border-radius:16px;border:none;background:#2563eb;color:#fff;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 6px 15px rgba(37,99,235,.3)}
+.btnBig:active{transform:translateY(2px);box-shadow:0 3px 8px rgba(37,99,235,.3)}
+
+#app{display:none;flex-direction:column;height:100%}
+header{padding:8px;text-align:center}
+#words{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.word{padding:6px 12px;border-radius:999px;border:2px solid #e7d6a8;background:#fffaf0;font-weight:900;font-size:16px}
+.word.off{opacity:.35;text-decoration:line-through}
+.word.on{background:#eef6ff;border-color:#b9d6ff}
+.word.found{background:rgba(34,197,94,.3);border-color:#22c55e}
+
+#board{flex:1;display:grid;gap:8px;padding:12px;touch-action:none;box-sizing:border-box}
+.cell{background:#fffaf0;border-radius:12px;display:flex;align-items:center;justify-content:center;
+font-size:24px;font-weight:900;user-select:none}
+.cell.sel{background:#c7e0ff}
+.cell.hit{background:rgba(34,197,94,.45)}
+
+footer{display:flex;justify-content:space-between;align-items:center;padding:10px}
+#timer{width:64px;height:64px;border-radius:50%;
+background:conic-gradient(#2563eb var(--p),rgba(0,0,0,.15) 0);
+display:flex;align-items:center;justify-content:center}
+#timer span{background:#fffaf0;width:46px;height:46px;border-radius:50%;
+display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px}
+.btn{padding:10px 14px;border-radius:12px;border:none;background:#2563eb;color:#fff;font-weight:900;cursor:pointer}
+
+#overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
+#modal{background:#fffaf0;padding:30px;border-radius:20px;text-align:center;font-weight:900;max-width:300px;width:90%}
+
+/* Kontener mobilny */
+:root{--app-w:390px;--app-h:780px}
+body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
+#shell{width:100%;max-width:var(--app-w);height:100vh;max-height:var(--app-h);margin:auto;background:inherit;overflow:hidden;position:relative}
+
+/* STRONA WYNIKÓW */
+#resultsScreen {
+  display:none;
+  flex-direction:column;
+  height:100%;
+  padding:20px 20px;
+  box-sizing:border-box;
+  overflow-y:auto;
+  text-align:center;
+  background:#fffaf0;
+  border-radius:20px;
+  margin:10px;
+}
+#resultsScreen h1 {
+  font-size:28px;
+  margin:0 0 30px;
+}
+#resultsScreen h2 {
+  font-size:22px;
+  margin:30px 0 10px;
+  color:#2563eb;
+}
+#resultsScreen p {
+  font-size:18px;
+  margin:8px 0;
+  font-weight:900;
+}
+#backToMenu {
+  margin-top:30px;
+  width:100%;
+  padding:16px;
+  font-size:19px;
+}
+</style>
+</head>
+<body>
+<div id="shell">
+
+  <!-- MENU GŁÓWNE -->
+  <div id="menu">
+    <div class="card">
+      <h1>🇵🇱 Gra Słówek</h1>
+      <p>Wybierz rozmiar planszy:</p>
+      <div class="btnGrid">
+        <button class="btnBig" data-size="5x6">5 × 6</button>
+        <button class="btnBig" data-size="6x7">6 × 7</button>
+      </div>
+      <button class="btnBig" id="showResults" style="margin-top:20px; background:#10b981;">WYNIKI GRY</button>
+    </div>
+  </div>
+
+  <!-- GRA -->
+  <div id="app">
+    <header><div id="words"></div></header>
+    <div id="board"></div>
+    <footer>
+      <div id="timer" style="--p:100%"><span id="time">60</span></div>
+      <button class="btn" id="back">MENU</button>
+    </footer>
+  </div>
+
+  <!-- WYGRANA/PRZEGRANA -->
+  <div id="overlay">
+    <div id="modal">
+      <div id="msg"></div><br><br>
+      <button class="btn" id="again" style="width:100%;padding:16px;font-size:19px">ZAGRAJ PONOWNIE</button>
+    </div>
+  </div>
+
+  <!-- STRONA WYNIKÓW -->
+  <div id="resultsScreen">
+    <h1>Wyniki Gry</h1>
+    <div id="globalStats"></div>
+    <div id="lastSessionStats"></div>
+    <div id="todayStats"></div>
+    <button class="btn" id="backToMenu">POWRÓT DO MENU</button>
+  </div>
+
+</div>
+
+<script>
+(() => {
+  const WORDS = [
+    "DOM","LAS","SEN","DÓŁ","BÓL","TOR","MUR","ŻAR","KĄT","ŁAN","EGO","LOS","CEL","MOC","RÓJ","TŁO","FON","KOD","RYM","MIT","SOK","LOT","RAP","ART","TYP","EKO","SYN","ŁAD","TON","WAT","GAS",
+    "WODA","KAWA","RYBA","LATO","ZIMA","OKNO","RĘKA","ŻABA","ŁÓDŹ","NOCĄ","MAKI","LASY","KOTY","DOMY","DUCH","MOCY","ŚLAD","KIER","ZNAM","IDEA","FALA","MOST","TŁUM","FORMA","ŚWIT","CIEŃ","NUTA",
+    "KWIAT","LIŚĆ","WIEŚ","GÓRA"
+  ].filter(w => w.length >= 3 && w.length <= 4);
+
+  const BASE_TIME = 60;
+  const ALPH = "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ";
+  const DIRS = [{dr:0,dc:1},{dr:1,dc:0},{dr:1,dc:1},{dr:1,dc:-1},{dr:0,dc:-1},{dr:-1,dc:0},{dr:-1,dc:-1},{dr:-1,dc:1}];
+
+  const menu = document.getElementById("menu");
+  const app = document.getElementById("app");
+  const board = document.getElementById("board");
+  const wordsEl = document.getElementById("words");
+  const overlay = document.getElementById("overlay");
+  const msg = document.getElementById("msg");
+  const back = document.getElementById("back");
+  const again = document.getElementById("again");
+  const timeEl = document.getElementById("time");
+  const timerEl = document.getElementById("timer");
+  const showResultsBtn = document.getElementById("showResults");
+  const resultsScreen = document.getElementById("resultsScreen");
+  const backToMenuBtn = document.getElementById("backToMenu");
+  const globalStatsEl = document.getElementById("globalStats");
+  const lastSessionStatsEl = document.getElementById("lastSessionStats");
+  const todayStatsEl = document.getElementById("todayStats");
+
+  let GAME = { rows: 6, cols: 5 };
+  let words4 = [];
+  let active = new Set();
+  let found = new Set();
+  let grid = [];
+  let cells = [];
+  let timer = null;
+  let timeLeft = BASE_TIME;
+  let dragging = false;
+  let startCell = null;
+  let path = [];
+
+  let activeCount = Math.max(1, Math.min(4, Number(localStorage.getItem("ACTIVE_COUNT")) || 2));
+
+  // ===== DŹWIĘKI =====
+  const clickSound = new Audio('sounds/click.mp3');
+  const tickSound = new Audio('sounds/tick.mp3');
+  const recordsMusic = new Audio('sounds/records_loop.mp3');
+  const fanfareSound = new Audio('sounds/fanfare.mp3');
+  const loseSound = new Audio('sounds/lose.mp3');
+
+  clickSound.volume = 0.6;
+  tickSound.volume = 0.6;
+  recordsMusic.volume = 0.9;
+  recordsMusic.loop = true;
+  fanfareSound.volume = 0.4;
+  loseSound.volume = 0.8;
+
+  // Odblokowanie dźwięków na pierwszy click
+  document.addEventListener('click', () => {
+    tickSound.play().then(() => {
+      tickSound.pause();
+      tickSound.currentTime = 0;
+    }).catch(() => {});
+    recordsMusic.play().then(() => {
+      recordsMusic.pause();
+      recordsMusic.currentTime = 0;
+    }).catch(() => {});
+    fanfareSound.play().then(() => {
+      fanfareSound.pause();
+      fanfareSound.currentTime = 0;
+    }).catch(() => {});
+    loseSound.play().then(() => {
+      loseSound.pause();
+      loseSound.currentTime = 0;
+    }).catch(() => {});
+  }, { once: true });
+
+  // Dźwięk click na buttonach
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.btn, .btnBig')) {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+    }
+  });
+
+  // Statystyki
+  if (!localStorage.getItem("gameStats")) {
+    localStorage.setItem("gameStats", JSON.stringify({
+      startDate: new Date().toISOString().split('T')[0],
+      stats: {}
+    }));
+  }
+
+  function updateStats(isWin) {
+    const today = new Date().toISOString().split('T')[0];
+    const stats = JSON.parse(localStorage.getItem("gameStats"));
+    if (!stats.stats[today]) stats.stats[today] = { wins: 0, losses: 0 };
+    if (isWin) stats.stats[today].wins++;
+    else stats.stats[today].losses++;
+    localStorage.setItem("gameStats", JSON.stringify(stats));
+  }
+
+  function showResults() {
+    menu.style.display = "none";
+    resultsScreen.style.display = "flex";
+    recordsMusic.currentTime = 0;
+    recordsMusic.play().catch(() => {});
+
+    const stats = JSON.parse(localStorage.getItem("gameStats"));
+    const startDate = stats.startDate;
+    const dailyStats = stats.stats;
+
+    let globalWins = 0, globalLosses = 0;
+    for (const day in dailyStats) {
+      globalWins += dailyStats[day].wins || 0;
+      globalLosses += dailyStats[day].losses || 0;
+    }
+    globalStatsEl.innerHTML = `<h2>Globalnie (od ${startDate})</h2><p>Wygrane rundy: <strong>${globalWins}</strong></p><p>Przegrane rundy: <strong>${globalLosses}</strong></p>`;
+
+    const today = new Date().toISOString().split('T')[0];
+    const todayWins = dailyStats[today]?.wins || 0;
+    const todayLosses = dailyStats[today]?.losses || 0;
+    todayStatsEl.innerHTML = `<h2>Dziś (${today})</h2><p>Wygrane: <strong>${todayWins}</strong></p><p>Przegrane: <strong>${todayLosses}</strong></p>`;
+
+    const dates = Object.keys(dailyStats).sort().reverse();
+    let lastSessionDate = null;
+    for (const d of dates) {
+      if (d !== today && (dailyStats[d].wins > 0 || dailyStats[d].losses > 0)) {
+        lastSessionDate = d;
+        break;
+      }
+    }
+
+    if (lastSessionDate) {
+      const lastWins = dailyStats[lastSessionDate].wins || 0;
+      const lastLosses = dailyStats[lastSessionDate].losses || 0;
+      lastSessionStatsEl.innerHTML = `<h2>Ostatnia sesja (${lastSessionDate})</h2><p>Wygrane: <strong>${lastWins}</strong></p><p>Przegrane: <strong>${lastLosses}</strong></p>`;
+    } else {
+      lastSessionStatsEl.innerHTML = `<h2>Ostatnia sesja</h2><p>Brak wcześniejszych sesji</p>`;
+    }
+  }
+
+  document.querySelectorAll("[data-size]").forEach(btn => {
+    btn.onclick = () => {
+      const [cols, rows] = btn.dataset.size.split("x").map(Number);
+      GAME = { rows, cols };
+      updateBoardCSS();
+      startGame();
+    };
+  });
+
+  function updateBoardCSS() {
+    board.style.gridTemplateColumns = `repeat(${GAME.cols}, 1fr)`;
+    board.style.gridTemplateRows = `repeat(${GAME.rows}, 1fr)`;
+  }
+
+  function pick4() {
+    const pool = WORDS.slice();
+    const out = [];
+    while (out.length < 4 && pool.length) out.push(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]);
+    while (out.length < 4) out.push("DOM");
+    return out;
+  }
+
+  function applyActiveFromCount() {
+    active = new Set(words4.slice(0, activeCount));
+  }
+
+  function renderChips() {
+    wordsEl.innerHTML = "";
+    words4.forEach(w => {
+      const s = document.createElement("span");
+      s.className = "word off";
+      s.textContent = w;
+      s.onclick = () => {
+        if (active.has(w)) {
+          if (active.size <= 1) return;
+          active.delete(w);
+        } else active.add(w);
+        activeCount = active.size;
+        localStorage.setItem("ACTIVE_COUNT", activeCount);
+        found.clear();
+        buildRound();
+      };
+      wordsEl.appendChild(s);
+    });
+    updateChips();
+  }
+
+  function updateChips() {
+    [...wordsEl.children].forEach(chip => {
+      const w = chip.textContent;
+      chip.className = "word " + (found.has(w) ? "found" : active.has(w) ? "on" : "off");
+    });
+  }
+
+  function buildGrid() {
+    const g = Array.from({length: GAME.rows}, () => Array(GAME.cols).fill(null));
+    const list = [...active];
+    for (let i = list.length-1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
+    for (const w of list) {
+      for (let t = 0; t < 500; t++) {
+        const d = DIRS[Math.floor(Math.random() * DIRS.length)];
+        const r0 = Math.floor(Math.random() * GAME.rows);
+        const c0 = Math.floor(Math.random() * GAME.cols);
+        const rE = r0 + d.dr * (w.length - 1);
+        const cE = c0 + d.dc * (w.length - 1);
+        if (rE < 0 || rE >= GAME.rows || cE < 0 || cE >= GAME.cols) continue;
+        let ok = true;
+        for (let i = 0; i < w.length; i++) {
+          if (g[r0 + d.dr * i][c0 + d.dc * i] !== null) { ok = false; break; }
+        }
+        if (ok) {
+          for (let i = 0; i < w.length; i++) {
+            g[r0 + d.dr * i][c0 + d.dc * i] = w[i];
+          }
+          break;
+        }
+      }
+    }
+    for (let r = 0; r < GAME.rows; r++) {
+      for (let c = 0; c < GAME.cols; c++) {
+        if (g[r][c] === null) g[r][c] = ALPH[Math.floor(Math.random() * ALPH.length)];
+      }
+    }
+    return g;
+  }
+
+  function renderBoard() {
+    board.innerHTML = "";
+    cells = [];
+    for (let r = 0; r < GAME.rows; r++) {
+      for (let c = 0; c < GAME.cols; c++) {
+        const el = document.createElement("div");
+        el.className = "cell";
+        el.textContent = grid[r][c];
+        el.dataset.r = r; el.dataset.c = c;
+        board.appendChild(el);
+        cells.push(el);
+      }
+    }
+  }
+
+  function idx(p) { return p.r * GAME.cols + p.c; }
+  function clearSel() { cells.forEach(el => el.classList.remove("sel")); }
+  function paint(p) { clearSel(); p.forEach(x => cells[idx(x)].classList.add("sel")); }
+
+  function line(a, b) {
+    const dr = b.r - a.r, dc = b.c - a.c;
+    const sdr = dr === 0 ? 0 : (dr > 0 ? 1 : -1);
+    const sdc = dc === 0 ? 0 : (dc > 0 ? 1 : -1);
+    const adr = Math.abs(dr), adc = Math.abs(dc);
+    if (!((adr === 0 && adc > 0) || (adc === 0 && adr > 0) || (adr === adc && adr > 0))) return [];
+    const n = Math.max(adr, adc);
+    const out = [];
+    let rr = a.r, cc = a.c;
+    for (let i = 0; i <= n; i++) {
+      out.push({r: rr, c: cc});
+      rr += sdr; cc += sdc;
+    }
+    return out;
+  }
+
+  board.addEventListener("pointerdown", e => {
+    const el = e.target.closest(".cell");
+    if (!el) return;
+    dragging = true;
+    board.setPointerCapture(e.pointerId);
+    startCell = {r: +el.dataset.r, c: +el.dataset.c};
+    path = [startCell];
+    paint(path);
+  });
+
+  board.addEventListener("pointermove", e => {
+    if (!dragging) return;
+    const el = document.elementFromPoint(e.clientX, e.clientY)?.closest(".cell");
+    if (!el) return;
+    const cur = {r: +el.dataset.r, c: +el.dataset.c};
+    path = line(startCell, cur);
+    paint(path);
+  });
+
+  board.addEventListener("pointerup", () => {
+    if (!dragging) return;
+    dragging = false;
+    clearSel();
+    if (path.length >= 3) {
+      const txt = path.map(p => grid[p.r][p.c]).join("");
+      const rev = txt.split("").reverse().join("");
+      for (const w of active) {
+        if (found.has(w)) continue;
+        if (txt === w || rev === w) {
+          found.add(w);
+          updateChips();
+          path.forEach(p => cells[idx(p)].classList.add("hit"));
+          if (found.size === active.size) win();
+          break;
+        }
+      }
+    }
+    path = [];
+  });
+
+  let lastSecond = -1;
+
+  function startTimer() {
+    clearInterval(timer);
+    timeLeft = BASE_TIME;
+    timeEl.textContent = timeLeft;
+    timerEl.style.setProperty("--p", "100%");
+    lastSecond = -1;
+    timer = setInterval(() => {
+      timeLeft--;
+      timeEl.textContent = timeLeft;
+      timerEl.style.setProperty("--p", (timeLeft / BASE_TIME * 100) + "%");
+
+      const sec = timeLeft;
+      if (sec !== lastSecond && sec > 0) {
+        lastSecond = sec;
+        tickSound.currentTime = 0;
+        tickSound.play().catch(() => {});
+      }
+
+      if (timeLeft <= 0) lose();
+    }, 1000);
+  }
+
+  function win() {
+    updateStats(true);
+    fanfareSound.currentTime = 0;
+    fanfareSound.play().catch(() => {});
+    end("🎉 Gratulacje!<br>Znaleziono wszystkie słowa!");
+  }
+
+  function lose() {
+    updateStats(false);
+    loseSound.currentTime = 0;
+    loseSound.play().catch(() => {});
+    end("⏱️ Czas się skończył!<br>Spróbuj jeszcze raz.");
+  }
+
+  function end(text) {
+    clearInterval(timer);
+    msg.innerHTML = text;
+    overlay.style.display = "flex";
+  }
+
+  function buildRound() {
+    overlay.style.display = "none";
+    found.clear();
+    grid = buildGrid();
+    renderBoard();
+    updateChips();
+    startTimer();
+  }
+
+  function startGame() {
+    menu.style.display = "none";
+    app.style.display = "flex";
+    words4 = pick4();
+    applyActiveFromCount();
+    renderChips();
+    buildRound();
+  }
+
+  back.onclick = () => {
+    clearInterval(timer);
+    app.style.display = "none";
+    menu.style.display = "flex";
+  };
+
+  again.onclick = () => {
+    words4 = pick4();
+    applyActiveFromCount();
+    renderChips();
+    buildRound();
+  };
+
+  showResultsBtn.onclick = showResults;
+  backToMenuBtn.onclick = () => {
+    recordsMusic.pause();
+    recordsMusic.currentTime = 0;
+    resultsScreen.style.display = "none";
+    menu.style.display = "flex";
+  };
+
+  menu.style.display = "flex";
+  app.style.display = "none";
+})();
+</script>
+</body>
+</html>
