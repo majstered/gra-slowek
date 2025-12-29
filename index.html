@@ -105,7 +105,11 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     <div id="board"></div>
     <footer>
       <div id="timer" style="--p:100%"><span id="time">60</span></div>
-      <button class="btn" id="back">MENU</button>
+
+      <div style="display:flex;gap:8px">
+        <button class="btn" onclick="goFullscreen()">⛶</button>
+        <button class="btn" id="back">MENU</button>
+      </div>
     </footer>
   </div>
 
@@ -521,5 +525,14 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   app.style.display = "none";
 })();
 </script>
+
+<script>
+function goFullscreen() {
+  const el = document.documentElement;
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+</script>
+
 </body>
 </html>
