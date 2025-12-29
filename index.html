@@ -39,6 +39,14 @@ display:flex;align-items:center;justify-content:center}
 #timer span{background:#fffaf0;width:46px;height:46px;border-radius:50%;
 display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px}
 .btn{padding:10px 14px;border-radius:12px;border:none;background:#2563eb;color:#fff;font-weight:900;cursor:pointer}
+.iconBtn{
+  width:46px;height:46px;border-radius:12px;border:none;
+  background:#2563eb;color:#fff;font-weight:900;font-size:20px;
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 6px 15px rgba(37,99,235,.3);
+}
+.iconBtn:active{transform:translateY(2px);box-shadow:0 3px 8px rgba(37,99,235,.3)}
+.iconBtn.off{background:#6b7280;box-shadow:0 6px 15px rgba(107,114,128,.25)}
 
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
 #modal{background:#fffaf0;padding:30px;border-radius:20px;text-align:center;font-weight:900;max-width:300px;width:90%}
@@ -95,7 +103,11 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
         <button class="btnBig" data-size="5x6">5 × 6</button>
         <button class="btnBig" data-size="6x7">6 × 7</button>
       </div>
+
       <button class="btnBig" id="showResults" style="margin-top:20px; background:#10b981;">WYNIKI GRY</button>
+
+      <!-- NOWE: EXIT -->
+      <button class="btnBig" id="exitBtn" style="margin-top:20px; background:#ef4444;">EXIT</button>
     </div>
   </div>
 
@@ -104,7 +116,15 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     <header><div id="words"></div></header>
     <div id="board"></div>
     <footer>
-      <div id="timer" style="--p:100%"><span id="time">60</span></div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="timer" style="--p:100%"><span id="time">60</span></div>
+
+        <!-- TYKANIE ZEGARA -->
+        <button class="iconBtn" id="toggleTick" title="Tykanie zegara">🎵</button>
+
+        <!-- WSZYSTKIE DŹWIĘKI -->
+        <button class="iconBtn" id="toggleSound" title="Dźwięki">🎶</button>
+      </div>
 
       <div style="display:flex;gap:8px">
         <button class="btn" onclick="goFullscreen()">⛶</button>
@@ -128,6 +148,33 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     <div id="lastSessionStats"></div>
     <div id="todayStats"></div>
     <button class="btn" id="backToMenu">POWRÓT DO MENU</button>
+  </div>
+
+  <!-- NOWE: EKRAN WYLOGOWANIA -->
+  <div id="logoutScreen" style="
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100%;
+    padding:30px;
+    text-align:center;
+    background:#fffaf0;
+    border-radius:20px;
+    margin:10px;
+    font-weight:900;
+  ">
+    <h1 style="font-size:26px;margin:0 0 20px;">👋 Zostałeś wylogowany</h1>
+
+    <p style="font-size:18px;line-height:1.5;margin:0;">
+      Zostałeś wylogowany z gry.<br><br>
+      Możesz teraz <strong>bezpiecznie zamknąć przeglądarkę</strong><br>
+      i powrócić kiedy tylko chcesz.
+    </p>
+
+    <button class="btnBig" style="margin-top:30px;" id="backFromLogout">
+      🔄 POWRÓT DO MENU
+    </button>
   </div>
 
 </div>
@@ -161,6 +208,14 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   const lastSessionStatsEl = document.getElementById("lastSessionStats");
   const todayStatsEl = document.getElementById("todayStats");
 
+  // NOWE
+  const exitBtn = document.getElementById("exitBtn");
+  const logoutScreen = document.getElementById("logoutScreen");
+  const backFromLogout = document.getElementById("backFromLogout");
+
+  const toggleTickBtn = document.getElementById("toggleTick");
+  const toggleSoundBtn = document.getElementById("toggleSound");
+
   let GAME = { rows: 6, cols: 5 };
   let words4 = [];
   let active = new Set();
@@ -175,6 +230,7 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 
   let activeCount = Math.max(1, Math.min(4, Number(localStorage.getItem("ACTIVE_COUNT")) || 2));
 
+
   // ===== DŹWIĘKI =====
   const clickSound = new Audio('sounds/click.mp3');
   const tickSound = new Audio('sounds/tick.mp3');
@@ -183,37 +239,82 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   const loseSound = new Audio('sounds/lose.mp3');
 
   clickSound.volume = 0.6;
-  tickSound.volume = 0.3;
+  tickSound.volume = 0.6;
   recordsMusic.volume = 0.9;
   recordsMusic.loop = true;
   fanfareSound.volume = 0.4;
   loseSound.volume = 0.8;
 
+// ===== USTAWIENIA DŹWIĘKU (zapamiętywane) =====
+let soundOn = (localStorage.getItem("SOUND_ON") ?? "1") !== "0"; // 🎶
+let tickOn  = (localStorage.getItem("TICK_ON")  ?? "1") !== "0"; // 🎵
+
+function syncAudioFlags() {
+  const muteAll = !soundOn;
+  // globalny mute
+  [clickSound, tickSound, recordsMusic, fanfareSound, loseSound].forEach(a => { a.muted = muteAll; });
+
+  // tykanie zależne od globalnego + tickOn
+  tickSound.muted = muteAll || !tickOn;
+
+  // jeśli globalnie wyciszone, zatrzymaj muzykę w tle wyników
+  if (muteAll) {
+    try { recordsMusic.pause(); recordsMusic.currentTime = 0; } catch (e) {}
+  }
+}
+
+function renderAudioButtons() {
+  // tick
+  toggleTickBtn.textContent = tickOn ? "🎵" : "🚫🎵";
+  toggleTickBtn.classList.toggle("off", !tickOn || !soundOn);
+
+  // global
+  toggleSoundBtn.textContent = soundOn ? "🎶" : "🚫🎶";
+  toggleSoundBtn.classList.toggle("off", !soundOn);
+}
+
+function safePlay(audio, { reset=true } = {}) {
+  try {
+    if (!audio || audio.muted) return;
+    if (reset) audio.currentTime = 0;
+    audio.play().catch(() => {});
+  } catch (e) {}
+}
+
+// init stanu audio + ikon
+syncAudioFlags();
+renderAudioButtons();
+
+toggleSoundBtn.onclick = () => {
+  soundOn = !soundOn;
+  localStorage.setItem("SOUND_ON", soundOn ? "1" : "0");
+  syncAudioFlags();
+  renderAudioButtons();
+};
+
+toggleTickBtn.onclick = () => {
+  tickOn = !tickOn;
+  localStorage.setItem("TICK_ON", tickOn ? "1" : "0");
+  syncAudioFlags();
+  renderAudioButtons();
+};
+
   // Odblokowanie dźwięków na pierwszy click
-  document.addEventListener('click', () => {
-    tickSound.play().then(() => {
-      tickSound.pause();
-      tickSound.currentTime = 0;
+document.addEventListener('click', () => {
+  // odblokuj dźwięk (mobilki) – nawet jeśli wyciszone, to i tak nic nie zagra (muted)
+  [tickSound, recordsMusic, fanfareSound, loseSound].forEach(a => {
+    a.play().then(() => {
+      a.pause();
+      a.currentTime = 0;
     }).catch(() => {});
-    recordsMusic.play().then(() => {
-      recordsMusic.pause();
-      recordsMusic.currentTime = 0;
-    }).catch(() => {});
-    fanfareSound.play().then(() => {
-      fanfareSound.pause();
-      fanfareSound.currentTime = 0;
-    }).catch(() => {});
-    loseSound.play().then(() => {
-      loseSound.pause();
-      loseSound.currentTime = 0;
-    }).catch(() => {});
-  }, { once: true });
+  });
+}, { once: true });
 
   // Dźwięk click na buttonach
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.btn, .btnBig')) {
-      clickSound.currentTime = 0;
-      clickSound.play().catch(() => {});
+    if (!soundOn) return;
+    if (e.target.closest('.btn, .btnBig, .iconBtn')) {
+      safePlay(clickSound);
     }
   });
 
@@ -236,9 +337,12 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 
   function showResults() {
     menu.style.display = "none";
+    logoutScreen.style.display = "none";
     resultsScreen.style.display = "flex";
-    recordsMusic.currentTime = 0;
-    recordsMusic.play().catch(() => {});
+    if (soundOn) {
+      recordsMusic.currentTime = 0;
+      safePlay(recordsMusic, { reset: false });
+    }
 
     const stats = JSON.parse(localStorage.getItem("gameStats"));
     const startDate = stats.startDate;
@@ -454,8 +558,7 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
       const sec = timeLeft;
       if (sec !== lastSecond && sec > 0) {
         lastSecond = sec;
-        tickSound.currentTime = 0;
-        tickSound.play().catch(() => {});
+        if (soundOn && tickOn) safePlay(tickSound);
       }
 
       if (timeLeft <= 0) lose();
@@ -464,15 +567,13 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 
   function win() {
     updateStats(true);
-    fanfareSound.currentTime = 0;
-    fanfareSound.play().catch(() => {});
+    if (soundOn) safePlay(fanfareSound);
     end("🎉 Gratulacje!<br>Znaleziono wszystkie słowa!");
   }
 
   function lose() {
     updateStats(false);
-    loseSound.currentTime = 0;
-    loseSound.play().catch(() => {});
+    if (soundOn) safePlay(loseSound);
     end("⏱️ Czas się skończył!<br>Spróbuj jeszcze raz.");
   }
 
@@ -492,6 +593,12 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   }
 
   function startGame() {
+    // start gry zawsze wyłącza inne ekrany
+    resultsScreen.style.display = "none";
+    logoutScreen.style.display = "none";
+    recordsMusic.pause();
+    recordsMusic.currentTime = 0;
+
     menu.style.display = "none";
     app.style.display = "flex";
     words4 = pick4();
@@ -514,10 +621,40 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   };
 
   showResultsBtn.onclick = showResults;
+
   backToMenuBtn.onclick = () => {
     recordsMusic.pause();
     recordsMusic.currentTime = 0;
     resultsScreen.style.display = "none";
+    menu.style.display = "flex";
+  };
+
+    // NOWE: EXIT -> ekran wylogowania
+  exitBtn.onclick = async () => {
+
+    // 1️⃣ ZAWSZE WYJDŹ Z FULLSCREEN
+    if (document.fullscreenElement) {
+      await document.exitFullscreen();
+    }
+
+    // 2️⃣ ZATRZYMAJ WSZYSTKO
+    clearInterval(timer);
+    recordsMusic.pause();
+    recordsMusic.currentTime = 0;
+
+    // 3️⃣ SCHOWAJ EKRANY
+    menu.style.display = "none";
+    app.style.display = "none";
+    overlay.style.display = "none";
+    resultsScreen.style.display = "none";
+
+    // 4️⃣ POKAŻ WYLOGOWANIE
+    logoutScreen.style.display = "flex";
+  };
+
+
+  backFromLogout.onclick = () => {
+    logoutScreen.style.display = "none";
     menu.style.display = "flex";
   };
 
@@ -529,10 +666,15 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 <script>
 function goFullscreen() {
   const el = document.documentElement;
-  if (el.requestFullscreen) el.requestFullscreen();
-  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+
+  if (!document.fullscreenElement) {
+    el.requestFullscreen();
+  } else {
+    document.exitFullscreen();
+  }
 }
 </script>
+
 
 </body>
 </html>
