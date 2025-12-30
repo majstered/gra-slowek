@@ -6,7 +6,6 @@
 <title>Gra Słówek</title>
 <link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="manifest" href="manifest.json">
 
 <style>
 html,body{margin:0;padding:0;height:100%;overflow:hidden;font-family:system-ui,sans-serif;
@@ -15,6 +14,9 @@ background:radial-gradient(circle at top,#fff6d8,#f1deb0)}
 #menu{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:30px}
 .card{background:#fffaf0;padding:30px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.15);text-align:center;font-weight:900;max-width:320px;width:90%}
 h1{margin:0 0 20px;font-size:28px}
+.btnGrid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:20px}
+.btnBig{padding:18px;border-radius:16px;border:none;background:#2563eb;color:#fff;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 6px 15px rgba(37,99,235,.3)}
+.btnBig:active{transform:translateY(2px);box-shadow:0 3px 8px rgba(37,99,235,.3)}
 
 #app{display:none;flex-direction:column;height:100%}
 header{padding:8px;text-align:center}
@@ -37,29 +39,21 @@ display:flex;align-items:center;justify-content:center}
 #timer span{background:#fffaf0;width:46px;height:46px;border-radius:50%;
 display:flex;align-items:center;justify-content:center;font-weight:900;font-size:18px}
 .btn{padding:10px 14px;border-radius:12px;border:none;background:#2563eb;color:#fff;font-weight:900;cursor:pointer}
-.iconBtn{
-  width:46px;height:46px;border-radius:12px;border:none;
-  background:#2563eb;color:#fff;font-weight:900;font-size:20px;
-  cursor:pointer;display:flex;align-items:center;justify-content:center;
-  box-shadow:0 6px 15px rgba(37,99,235,.3);
-}
-.iconBtn:active{transform:translateY(2px);box-shadow:0 3px 8px rgba(37,99,235,.3)}
-.iconBtn.off{background:#6b7280;box-shadow:0 6px 15px rgba(107,114,128,.25)}
 
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
 #modal{background:#fffaf0;padding:30px;border-radius:20px;text-align:center;font-weight:900;max-width:300px;width:90%}
 
-/* Kontener mobilny – dokładnie jak w małym kodzie */
+/* Kontener mobilny */
 :root{--app-w:390px;--app-h:780px}
 body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 #shell{width:100%;max-width:var(--app-w);height:100vh;max-height:var(--app-h);margin:auto;background:inherit;overflow:hidden;position:relative}
 
-/* STRONA WYNIKÓW – height:100% żeby wypełniała ekran */
+/* STRONA WYNIKÓW */
 #resultsScreen {
   display:none;
   flex-direction:column;
   height:100%;
-  padding:20px 20px 40px;
+  padding:20px 20px;
   box-sizing:border-box;
   overflow-y:auto;
   text-align:center;
@@ -67,57 +61,26 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   border-radius:20px;
   margin:10px;
 }
-#resultsScreen h1 {font-size:28px;margin:0 0 30px;}
-#resultsScreen h2 {font-size:22px;margin:30px 0 10px;color:#2563eb;}
-#resultsScreen p {font-size:18px;margin:8px 0;font-weight:900;}
-#backToMenu {margin-top:30px;width:100%;padding:16px;font-size:19px;}
-
-/* EKRAN WYLOGOWANIA */
-#logoutScreen {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  padding: 40px 30px;
-  text-align: center;
-  background: #fffaf0;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.15);
-  max-width: 320px;
-  width: 90%;
-  margin: auto;
-  position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 100;
+#resultsScreen h1 {
+  font-size:28px;
+  margin:0 0 30px;
 }
-
-/* NOWOCZESNE MENU */
-.menuBtns{display:flex;flex-direction:column;gap:12px;margin-top:18px}
-.btnFlat{
+#resultsScreen h2 {
+  font-size:22px;
+  margin:30px 0 10px;
+  color:#2563eb;
+}
+#resultsScreen p {
+  font-size:18px;
+  margin:8px 0;
+  font-weight:900;
+}
+#backToMenu {
+  margin-top:30px;
   width:100%;
-  padding:14px 18px;
-  border-radius:14px;
-  border:none;
-  background:#ffffffd9;
-  color:#1f2937;
-  font-size:16px;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
-  transition:transform .16s ease, background .16s ease, box-shadow .16s ease;
+  padding:16px;
+  font-size:19px;
 }
-.btnFlat:hover{background:#ffffff;transform:translateY(-1px)}
-.btnFlat:active{transform:translateY(0);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.05)}
-.btnFlat.small{font-size:15px;padding:12px 16px;font-weight:800}
-.btnFlat.danger{color:#b91c1c}
-
-.copyTip {margin-top: 8px;font-size: 13px;color: #6b6b6b;text-align: center;line-height: 1.4;}
-.audioBtn {background:none !important;border:none !important;box-shadow:none !important;padding:4px !important;margin:0 4px;font-size:22px;cursor:pointer;}
-.audioBtn.off {opacity:0.35;}
-.resultsCongrats{text-align:center;font-weight:800;margin:30px 0 18px;}
 </style>
 </head>
 <body>
@@ -128,18 +91,11 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     <div class="card">
       <h1>🇵🇱 Gra Słówek</h1>
       <p>Wybierz rozmiar planszy:</p>
-      
-      <div class="menuBtns">
-        <button class="btnFlat" data-size="5x6">Plansza 5 × 6</button>
-        <button class="btnFlat" data-size="6x7">Plansza 6 × 7</button>
-
-        <button class="btnFlat small" id="showResults">📊 Wyniki gry</button>
-        <button class="btnFlat small danger" id="exitBtn">🚪 Wyjście</button>
-        <button id="copyLinkBtn" class="btnFlat small">📋 Skopiuj adres gry</button>
-        <div class="copyTip">
-          ⚠️ Tip: najlepiej skopiować link i otworzyć w <b>Chrome</b> – wtedy można dodać grę na pulpit i śledzić swoje rekordy.
-        </div>
+      <div class="btnGrid">
+        <button class="btnBig" data-size="5x6">5 × 6</button>
+        <button class="btnBig" data-size="6x7">6 × 7</button>
       </div>
+      <button class="btnBig" id="showResults" style="margin-top:20px; background:#10b981;">WYNIKI GRY</button>
     </div>
   </div>
 
@@ -148,11 +104,8 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     <header><div id="words"></div></header>
     <div id="board"></div>
     <footer>
-      <div style="display:flex;align-items:center;gap:10px">
-        <div id="timer" style="--p:100%"><span id="time">60</span></div>
-        <button class="iconBtn audioBtn" id="toggleTick" title="Tykanie zegara">🕒</button>
-        <button class="iconBtn audioBtn" id="toggleSound" title="Dźwięki">🎵</button>
-      </div>
+      <div id="timer" style="--p:100%"><span id="time">60</span></div>
+
       <div style="display:flex;gap:8px">
         <button class="btn" onclick="goFullscreen()">⛶</button>
         <button class="btn" id="back">MENU</button>
@@ -175,29 +128,17 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     <div id="lastSessionStats"></div>
     <div id="todayStats"></div>
     <button class="btn" id="backToMenu">POWRÓT DO MENU</button>
-    <div class="resultsCongrats">GRATULACJE WYNIKÓW !!!</div>
-  </div>
-
-  <!-- EKRAN WYLOGOWANIA -->
-  <div id="logoutScreen">
-    <h1 style="font-size:26px;margin:0 0 20px;">👋 Zostałeś wylogowany</h1>
-    <p style="font-size:18px;line-height:1.5;margin:0;">
-      Zostałeś wylogowany z gry.<br><br>
-      Możesz teraz <strong>bezpiecznie zamknąć przeglądarkę</strong><br>
-      i powrócić kiedy tylko chcesz.
-    </p>
-    <button class="btn" style="margin-top:30px;padding:16px;width:100%;" id="backFromLogout">
-      🔄 POWRÓT DO MENU
-    </button>
   </div>
 
 </div>
 
 <script>
 (() => {
-  const WORDS = ["DOM","LAS","SEN","DÓŁ","BÓL","TOR","MUR","ŻAR","KĄT","ŁAN","EGO","LOS","CEL","MOC","RÓJ","TŁO","FON","KOD","RYM","MIT","SOK","LOT","RAP","ART","TYP","EKO","SYN","ŁAD","TON","WAT","GAS",
+  const WORDS = [
+    "DOM","LAS","SEN","DÓŁ","BÓL","TOR","MUR","ŻAR","KĄT","ŁAN","EGO","LOS","CEL","MOC","RÓJ","TŁO","FON","KOD","RYM","MIT","SOK","LOT","RAP","ART","TYP","EKO","SYN","ŁAD","TON","WAT","GAS",
     "WODA","KAWA","RYBA","LATO","ZIMA","OKNO","RĘKA","ŻABA","ŁÓDŹ","NOCĄ","MAKI","LASY","KOTY","DOMY","DUCH","MOCY","ŚLAD","KIER","ZNAM","IDEA","FALA","MOST","TŁUM","FORMA","ŚWIT","CIEŃ","NUTA",
-    "KWIAT","LIŚĆ","WIEŚ","GÓRA"].filter(w => w.length >= 3 && w.length <= 4);
+    "KWIAT","LIŚĆ","WIEŚ","GÓRA"
+  ].filter(w => w.length >= 3 && w.length <= 4);
 
   const BASE_TIME = 60;
   const ALPH = "AĄBCĆDEĘFGHIJKLŁMNŃOÓPQRSŚTUVWXYZŹŻ";
@@ -219,12 +160,6 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   const globalStatsEl = document.getElementById("globalStats");
   const lastSessionStatsEl = document.getElementById("lastSessionStats");
   const todayStatsEl = document.getElementById("todayStats");
-  const exitBtn = document.getElementById("exitBtn");
-  const logoutScreen = document.getElementById("logoutScreen");
-  const backFromLogout = document.getElementById("backFromLogout");
-  const toggleTick = document.getElementById("toggleTick");
-  const toggleSound = document.getElementById("toggleSound");
-  const copyLinkBtn = document.getElementById("copyLinkBtn");
 
   let GAME = { rows: 6, cols: 5 };
   let words4 = [];
@@ -237,78 +172,112 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   let dragging = false;
   let startCell = null;
   let path = [];
+
   let activeCount = Math.max(1, Math.min(4, Number(localStorage.getItem("ACTIVE_COUNT")) || 2));
 
-  // DŹWIĘKI
+  // ===== DŹWIĘKI =====
   const clickSound = new Audio('sounds/click.mp3');
   const tickSound = new Audio('sounds/tick.mp3');
   const recordsMusic = new Audio('sounds/records_loop.mp3');
   const fanfareSound = new Audio('sounds/fanfare.mp3');
   const loseSound = new Audio('sounds/lose.mp3');
 
-  clickSound.volume = 0.6; tickSound.volume = 0.6; recordsMusic.volume = 0.9; recordsMusic.loop = true;
-  fanfareSound.volume = 0.4; loseSound.volume = 0.8;
+  clickSound.volume = 0.6;
+  tickSound.volume = 0.6;
+  recordsMusic.volume = 0.9;
+  recordsMusic.loop = true;
+  fanfareSound.volume = 0.4;
+  loseSound.volume = 0.8;
 
-  function safePlay(audio) { audio.currentTime = 0; audio.play().catch(() => {}); }
-
-  document.addEventListener('click', () => {  // odblokowanie dźwięków
-    [tickSound, recordsMusic, fanfareSound, loseSound].forEach(safePlay);
+  // Odblokowanie dźwięków na pierwszy click
+  document.addEventListener('click', () => {
+    tickSound.play().then(() => {
+      tickSound.pause();
+      tickSound.currentTime = 0;
+    }).catch(() => {});
+    recordsMusic.play().then(() => {
+      recordsMusic.pause();
+      recordsMusic.currentTime = 0;
+    }).catch(() => {});
+    fanfareSound.play().then(() => {
+      fanfareSound.pause();
+      fanfareSound.currentTime = 0;
+    }).catch(() => {});
+    loseSound.play().then(() => {
+      loseSound.pause();
+      loseSound.currentTime = 0;
+    }).catch(() => {});
   }, { once: true });
 
-  document.addEventListener('click', (e) => {  // kliknięcie na przyciskach
-    if (e.target.closest('.btn, .btnFlat')) safePlay(clickSound);
+  // Dźwięk click na buttonach
+  document.addEventListener('click', (e) => {
+    if (e.target.closest('.btn, .btnBig')) {
+      clickSound.currentTime = 0;
+      clickSound.play().catch(() => {});
+    }
   });
 
-  // Przełączniki dźwięku i tykania
-  let tickOn = localStorage.getItem("TICK_ON") !== "false";
-  let soundOn = localStorage.getItem("SOUND_ON") !== "false";
-  toggleTick.classList.toggle("off", !tickOn);
-  toggleSound.classList.toggle("off", !soundOn);
-  toggleTick.onclick = () => { tickOn = !tickOn; localStorage.setItem("TICK_ON", tickOn); toggleTick.classList.toggle("off", !tickOn); };
-  toggleSound.onclick = () => { soundOn = !soundOn; localStorage.setItem("SOUND_ON", soundOn); toggleSound.classList.toggle("off", !soundOn); };
-
-  // Kopiowanie linku
-  copyLinkBtn.onclick = () => {
-    navigator.clipboard.writeText(location.href).then(() => alert("Link skopiowany!")).catch(() => alert("Nie udało się skopiować."));
-  };
-
-  // Statystyki (pozostawione bez zmian)
+  // Statystyki
   if (!localStorage.getItem("gameStats")) {
-    localStorage.setItem("gameStats", JSON.stringify({startDate: new Date().toISOString().split('T')[0], stats: {}}));
+    localStorage.setItem("gameStats", JSON.stringify({
+      startDate: new Date().toISOString().split('T')[0],
+      stats: {}
+    }));
   }
 
-  function getStats() { return JSON.parse(localStorage.getItem("gameStats")).stats; }
-
-  function updateStats(win) {
+  function updateStats(isWin) {
     const today = new Date().toISOString().split('T')[0];
-    const stats = getStats();
-    if (!stats[today]) stats[today] = {wins: 0, losses: 0};
-    stats[today][win ? "wins" : "losses"]++;
-    localStorage.setItem("gameStats", JSON.stringify({startDate: JSON.parse(localStorage.getItem("gameStats")).startDate, stats}));
+    const stats = JSON.parse(localStorage.getItem("gameStats"));
+    if (!stats.stats[today]) stats.stats[today] = { wins: 0, losses: 0 };
+    if (isWin) stats.stats[today].wins++;
+    else stats.stats[today].losses++;
+    localStorage.setItem("gameStats", JSON.stringify(stats));
   }
 
   function showResults() {
     menu.style.display = "none";
     resultsScreen.style.display = "flex";
-    safePlay(recordsMusic);
-    // ... (kod wyświetlania statystyk – bez zmian)
-    const dailyStats = getStats();
+    recordsMusic.currentTime = 0;
+    recordsMusic.play().catch(() => {});
+
+    const stats = JSON.parse(localStorage.getItem("gameStats"));
+    const startDate = stats.startDate;
+    const dailyStats = stats.stats;
+
+    let globalWins = 0, globalLosses = 0;
+    for (const day in dailyStats) {
+      globalWins += dailyStats[day].wins || 0;
+      globalLosses += dailyStats[day].losses || 0;
+    }
+    globalStatsEl.innerHTML = `<h2>Globalnie (od ${startDate})</h2><p>Wygrane rundy: <strong>${globalWins}</strong></p><p>Przegrane rundy: <strong>${globalLosses}</strong></p>`;
+
     const today = new Date().toISOString().split('T')[0];
-    let totalWins = 0, totalLosses = 0;
-    for (const d in dailyStats) { totalWins += dailyStats[d].wins || 0; totalLosses += dailyStats[d].losses || 0; }
-    globalStatsEl.innerHTML = `<h2>Ogólne</h2><p>Wygrane: <strong>${totalWins}</strong></p><p>Przegrane: <strong>${totalLosses}</strong></p>`;
     const todayWins = dailyStats[today]?.wins || 0;
     const todayLosses = dailyStats[today]?.losses || 0;
     todayStatsEl.innerHTML = `<h2>Dziś (${today})</h2><p>Wygrane: <strong>${todayWins}</strong></p><p>Przegrane: <strong>${todayLosses}</strong></p>`;
-    // ostatnia sesja – uproszczone
-    lastSessionStatsEl.innerHTML = `<h2>Ostatnia sesja</h2><p>Sprawdź powyżej</p>`;
+
+    const dates = Object.keys(dailyStats).sort().reverse();
+    let lastSessionDate = null;
+    for (const d of dates) {
+      if (d !== today && (dailyStats[d].wins > 0 || dailyStats[d].losses > 0)) {
+        lastSessionDate = d;
+        break;
+      }
+    }
+
+    if (lastSessionDate) {
+      const lastWins = dailyStats[lastSessionDate].wins || 0;
+      const lastLosses = dailyStats[lastSessionDate].losses || 0;
+      lastSessionStatsEl.innerHTML = `<h2>Ostatnia sesja (${lastSessionDate})</h2><p>Wygrane: <strong>${lastWins}</strong></p><p>Przegrane: <strong>${lastLosses}</strong></p>`;
+    } else {
+      lastSessionStatsEl.innerHTML = `<h2>Ostatnia sesja</h2><p>Brak wcześniejszych sesji</p>`;
+    }
   }
 
-  // KLUCZOWA POPRAWKA – przyciski wyboru planszy
   document.querySelectorAll("[data-size]").forEach(btn => {
     btn.onclick = () => {
-      const [cols, rows] = btn.dataset.size.split("x").map(Number);  // 5x6 → cols=5, rows=6
-      GAME = { rows, cols };  // POPRAWIONE – bez zamiany miejsc!
+      const [cols, rows] = btn.dataset.size.split("x").map(Number);
+      GAME = { rows, cols };
       updateBoardCSS();
       startGame();
     };
@@ -319,7 +288,6 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     board.style.gridTemplateRows = `repeat(${GAME.rows}, 1fr)`;
   }
 
-  // reszta funkcji gry (pick4, renderChips, buildGrid itd.) – bez zmian, działają idealnie
   function pick4() {
     const pool = WORDS.slice();
     const out = [];
@@ -328,7 +296,9 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     return out;
   }
 
-  function applyActiveFromCount() { active = new Set(words4.slice(0, activeCount)); }
+  function applyActiveFromCount() {
+    active = new Set(words4.slice(0, activeCount));
+  }
 
   function renderChips() {
     wordsEl.innerHTML = "";
@@ -337,7 +307,10 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
       s.className = "word off";
       s.textContent = w;
       s.onclick = () => {
-        if (active.has(w)) { if (active.size <= 1) return; active.delete(w); } else active.add(w);
+        if (active.has(w)) {
+          if (active.size <= 1) return;
+          active.delete(w);
+        } else active.add(w);
         activeCount = active.size;
         localStorage.setItem("ACTIVE_COUNT", activeCount);
         found.clear();
@@ -358,7 +331,10 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   function buildGrid() {
     const g = Array.from({length: GAME.rows}, () => Array(GAME.cols).fill(null));
     const list = [...active];
-    for (let i = list.length-1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [list[i], list[j]] = [list[j], list[i]]; }
+    for (let i = list.length-1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [list[i], list[j]] = [list[j], list[i]];
+    }
     for (const w of list) {
       for (let t = 0; t < 500; t++) {
         const d = DIRS[Math.floor(Math.random() * DIRS.length)];
@@ -368,9 +344,13 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
         const cE = c0 + d.dc * (w.length - 1);
         if (rE < 0 || rE >= GAME.rows || cE < 0 || cE >= GAME.cols) continue;
         let ok = true;
-        for (let i = 0; i < w.length; i++) { if (g[r0 + d.dr * i][c0 + d.dc * i] !== null) { ok = false; break; } }
+        for (let i = 0; i < w.length; i++) {
+          if (g[r0 + d.dr * i][c0 + d.dc * i] !== null) { ok = false; break; }
+        }
         if (ok) {
-          for (let i = 0; i < w.length; i++) { g[r0 + d.dr * i][c0 + d.dc * i] = w[i]; }
+          for (let i = 0; i < w.length; i++) {
+            g[r0 + d.dr * i][c0 + d.dc * i] = w[i];
+          }
           break;
         }
       }
@@ -459,6 +439,7 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   });
 
   let lastSecond = -1;
+
   function startTimer() {
     clearInterval(timer);
     timeLeft = BASE_TIME;
@@ -469,17 +450,37 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
       timeLeft--;
       timeEl.textContent = timeLeft;
       timerEl.style.setProperty("--p", (timeLeft / BASE_TIME * 100) + "%");
-      if (timeLeft !== lastSecond && timeLeft > 0) {
-        lastSecond = timeLeft;
-        if (soundOn && tickOn) safePlay(tickSound);
+
+      const sec = timeLeft;
+      if (sec !== lastSecond && sec > 0) {
+        lastSecond = sec;
+        tickSound.currentTime = 0;
+        tickSound.play().catch(() => {});
       }
+
       if (timeLeft <= 0) lose();
     }, 1000);
   }
 
-  function win() { updateStats(true); if (soundOn) safePlay(fanfareSound); end("🎉 Gratulacje!<br>Znaleziono wszystkie słowa!"); }
-  function lose() { updateStats(false); if (soundOn) safePlay(loseSound); end("⏱️ Czas się skończył!<br>Spróbuj jeszcze raz."); }
-  function end(text) { clearInterval(timer); msg.innerHTML = text; overlay.style.display = "flex"; }
+  function win() {
+    updateStats(true);
+    fanfareSound.currentTime = 0;
+    fanfareSound.play().catch(() => {});
+    end("🎉 Gratulacje!<br>Znaleziono wszystkie słowa!");
+  }
+
+  function lose() {
+    updateStats(false);
+    loseSound.currentTime = 0;
+    loseSound.play().catch(() => {});
+    end("⏱️ Czas się skończył!<br>Spróbuj jeszcze raz.");
+  }
+
+  function end(text) {
+    clearInterval(timer);
+    msg.innerHTML = text;
+    overlay.style.display = "flex";
+  }
 
   function buildRound() {
     overlay.style.display = "none";
@@ -491,9 +492,6 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   }
 
   function startGame() {
-    resultsScreen.style.display = "none";
-    logoutScreen.style.display = "none";
-    recordsMusic.pause(); recordsMusic.currentTime = 0;
     menu.style.display = "none";
     app.style.display = "flex";
     words4 = pick4();
@@ -502,26 +500,26 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     buildRound();
   }
 
-  back.onclick = () => { clearInterval(timer); app.style.display = "none"; menu.style.display = "flex"; };
-  again.onclick = () => { words4 = pick4(); applyActiveFromCount(); renderChips(); buildRound(); };
-  showResultsBtn.onclick = showResults;
-  backToMenuBtn.onclick = () => { recordsMusic.pause(); recordsMusic.currentTime = 0; resultsScreen.style.display = "none"; menu.style.display = "flex"; };
-
-  exitBtn.onclick = async () => {
-    if (document.fullscreenElement) await document.exitFullscreen();
+  back.onclick = () => {
     clearInterval(timer);
-    recordsMusic.pause(); recordsMusic.currentTime = 0;
-    menu.style.display = app.style.display = overlay.style.display = resultsScreen.style.display = "none";
-    logoutScreen.style.display = "flex";
+    app.style.display = "none";
+    menu.style.display = "flex";
   };
 
-  backFromLogout.onclick = () => { logoutScreen.style.display = "none"; menu.style.display = "flex"; };
+  again.onclick = () => {
+    words4 = pick4();
+    applyActiveFromCount();
+    renderChips();
+    buildRound();
+  };
 
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
-    });
-  }
+  showResultsBtn.onclick = showResults;
+  backToMenuBtn.onclick = () => {
+    recordsMusic.pause();
+    recordsMusic.currentTime = 0;
+    resultsScreen.style.display = "none";
+    menu.style.display = "flex";
+  };
 
   menu.style.display = "flex";
   app.style.display = "none";
@@ -531,14 +529,8 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 <script>
 function goFullscreen() {
   const el = document.documentElement;
-  if (!document.fullscreenElement) {
-    if (el.requestFullscreen) el.requestFullscreen();
-    else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
-    else if (el.msRequestFullscreen) el.msRequestFullscreen();
-  } else {
-    if (document.exitFullscreen) document.exitFullscreen();
-    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
-  }
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
 }
 </script>
 
