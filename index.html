@@ -6,7 +6,6 @@
 <title>Gra Słówek</title>
 <link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="icon-192.png">
-<link rel="manifest" href="manifest.json">
 
 <style>
 html,body{margin:0;padding:0;height:100%;overflow:hidden;font-family:system-ui,sans-serif;
@@ -61,7 +60,8 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 #resultsScreen {
   display:none;
   flex-direction:column;
-  padding:20px 20px 40px;
+  height:100%;
+  padding:20px 20px;
   box-sizing:border-box;
   overflow-y:auto;
   text-align:center;
@@ -69,7 +69,6 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   border-radius:20px;
   margin:10px;
 }
-
 #resultsScreen h1 {
   font-size:28px;
   margin:0 0 30px;
@@ -90,98 +89,6 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   padding:16px;
   font-size:19px;
 }
-
-/* EKRAN WYLOGOWANIA – idealnie na środku ekranu */
-#logoutScreen {
-  display: none;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 24px;
-  padding: 40px 30px;
-  text-align: center;
-  background: #fffaf0;
-  border-radius: 20px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.15);
-  max-width: 320px;
-  width: 90%;
-  margin: auto;
-  
-  /* NOWE – idealne centrowanie na całym ekranie */
-  position: fixed;     /* <-- kluczowe */
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 100;        /* na wierzchu */
-}
-/* ===== NOWOCZESNE MENU (FINAL) ===== */
-.menuBtns{display:flex;flex-direction:column;gap:12px;margin-top:18px}
-.btnFlat{
-  width:100%;
-  padding:14px 18px;
-  border-radius:14px;
-  border:none;
-  background:#ffffffd9;
-  color:#1f2937;
-  font-size:16px;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
-  transition:transform .16s ease, background .16s ease, box-shadow .16s ease;
-}
-.btnFlat:hover{background:#ffffff;transform:translateY(-1px)}
-.btnFlat:active{transform:translateY(0);box-shadow:inset 0 0 0 1px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.05)}
-.btnFlat.small{font-size:15px;padding:12px 16px;font-weight:800}
-.btnFlat.danger{color:#b91c1c}
-
-.btnInstall{
-  margin-top:6px;
-  background:transparent;
-  border:none;
-  font-size:14px;
-  font-weight:900;
-  color:#2563eb;
-  cursor:pointer;
-  opacity:.85;
-}
-.btnInstall:hover{opacity:1;text-decoration:underline}
-.copyTip {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #6b6b6b;
-  text-align: center;
-  line-height: 1.4;
-}
-
-.audioBtn {
-  background: none !important;
-  border: none !important;
-  box-shadow: none !important;
-  padding: 4px !important;
-  margin: 0 4px;
-  font-size: 22px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.audioBtn:hover,
-.audioBtn:active {
-  background: none !important;
-  transform: none !important;
-}
-
-.audioBtn.off {
-  opacity: 0.35;
-}
-
-.resultsCongrats{
-  text-align:center;
-  font-weight:800;
-  margin-top: 30px;
-  margin-bottom: 18px;
-}
-
-
 </style>
 </head>
 <body>
@@ -192,22 +99,15 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     <div class="card">
       <h1>🇵🇱 Gra Słówek</h1>
       <p>Wybierz rozmiar planszy:</p>
-      
-      <div class="menuBtns">
-        <button class="btnFlat" data-size="5x6">Plansza 5 × 6</button>
-        <button class="btnFlat" data-size="6x7">Plansza 6 × 7</button>
-
-        <button class="btnFlat small" id="showResults">📊 Wyniki gry</button>
-
-        <button class="btnFlat small danger" id="exitBtn">🚪 Wyjście</button>
-        <button id="copyLinkBtn" class="btnFlat small">📋 Skopiuj adres gry</button>
-        <div class="copyTip">
-          ⚠️ Tip: najlepiej skopiować link i otworzyć w <b>Chrome</b> – wtedy można dodać grę na pulpit i śledzić swoje rekordy.
-        </div>
-  
-  
+      <div class="btnGrid">
+        <button class="btnBig" data-size="5x6">5 × 6</button>
+        <button class="btnBig" data-size="6x7">6 × 7</button>
       </div>
 
+      <button class="btnBig" id="showResults" style="margin-top:20px; background:#10b981;">WYNIKI GRY</button>
+
+      <!-- NOWE: EXIT -->
+      <button class="btnBig" id="exitBtn" style="margin-top:20px; background:#ef4444;">EXIT</button>
     </div>
   </div>
 
@@ -220,10 +120,10 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
         <div id="timer" style="--p:100%"><span id="time">60</span></div>
 
         <!-- TYKANIE ZEGARA -->
-        <button class="iconBtn audioBtn" id="toggleTick" title="Tykanie zegara">🕒</button>
+        <button class="iconBtn" id="toggleTick" title="Tykanie zegara">🎵</button>
 
         <!-- WSZYSTKIE DŹWIĘKI -->
-        <button class="iconBtn audioBtn" id="toggleSound" title="Dźwięki">🎵</button>
+        <button class="iconBtn" id="toggleSound" title="Dźwięki">🎶</button>
       </div>
 
       <div style="display:flex;gap:8px">
@@ -248,16 +148,26 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     <div id="lastSessionStats"></div>
     <div id="todayStats"></div>
     <button class="btn" id="backToMenu">POWRÓT DO MENU</button>
-    <div class="resultsCongrats">
-     GRATULACJE WYNIKÓW !!!
-    </div>
-  
   </div>
 
-  <div id="logoutScreen">
+  <!-- NOWE: EKRAN WYLOGOWANIA -->
+  <div id="logoutScreen" style="
+    display:none;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    height:100%;
+    padding:30px;
+    text-align:center;
+    background:#fffaf0;
+    border-radius:20px;
+    margin:10px;
+    font-weight:900;
+  ">
     <h1 style="font-size:26px;margin:0 0 20px;">👋 Zostałeś wylogowany</h1>
 
     <p style="font-size:18px;line-height:1.5;margin:0;">
+      Zostałeś wylogowany z gry.<br><br>
       Możesz teraz <strong>bezpiecznie zamknąć przeglądarkę</strong><br>
       i powrócić kiedy tylko chcesz.
     </p>
@@ -355,11 +265,11 @@ function syncAudioFlags() {
 
 function renderAudioButtons() {
   // tick
-  toggleTickBtn.textContent = tickOn ? "🕒" : "🚫";
+  toggleTickBtn.textContent = tickOn ? "🎵" : "🚫🎵";
   toggleTickBtn.classList.toggle("off", !tickOn || !soundOn);
 
   // global
-  toggleSoundBtn.textContent = soundOn ? "🎵" : "🚫";
+  toggleSoundBtn.textContent = soundOn ? "🎶" : "🚫🎶";
   toggleSoundBtn.classList.toggle("off", !soundOn);
 }
 
@@ -389,22 +299,6 @@ toggleTickBtn.onclick = () => {
   renderAudioButtons();
 };
 
-const copyLinkBtn = document.getElementById("copyLinkBtn");
-
-if (copyLinkBtn) {
-  copyLinkBtn.onclick = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      copyLinkBtn.textContent = "✅ Skopiowano adres";
-      setTimeout(() => {
-        copyLinkBtn.textContent = "📋 Skopiuj adres gry";
-      }, 1500);
-    } catch (e) {
-      alert("Nie udało się skopiować adresu");
-    }
-  };
-}
-
   // Odblokowanie dźwięków na pierwszy click
 document.addEventListener('click', () => {
   // odblokuj dźwięk (mobilki) – nawet jeśli wyciszone, to i tak nic nie zagra (muted)
@@ -419,7 +313,7 @@ document.addEventListener('click', () => {
   // Dźwięk click na buttonach
   document.addEventListener('click', (e) => {
     if (!soundOn) return;
-    if (e.target.closest('.btn, .btnBig, .iconBtn, .btnFlat, .btnInstall')) {
+    if (e.target.closest('.btn, .btnBig, .iconBtn')) {
       safePlay(clickSound);
     }
   });
@@ -764,14 +658,7 @@ document.addEventListener('click', () => {
     menu.style.display = "flex";
   };
 
-  
-  // ===== PWA: Service Worker (offline + szybsze ładowanie) =====
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js").catch(() => {});
-    });
-  }
-menu.style.display = "flex";
+  menu.style.display = "flex";
   app.style.display = "none";
 })();
 </script>
