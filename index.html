@@ -18,6 +18,21 @@ h1{margin:0 0 20px;font-size:28px}
 .btnBig{padding:18px;border-radius:16px;border:none;background:#2563eb;color:#fff;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 6px 15px rgba(37,99,235,.3)}
 .btnBig:active{transform:translateY(2px);box-shadow:0 3px 8px rgba(37,99,235,.3)}
 
+.extraBtns{margin-top:25px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.btnSmall{padding:14px 20px;border-radius:14px;border:none;background:#ffffffd9;color:#1f2937;font-size:16px;font-weight:800;cursor:pointer;
+box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);width:100%;max-width:280px}
+.btnSmall.danger{color:#b91c1c}
+.btnSmall.copy{font-size:15px;padding:12px 16px}
+
+.copyTip {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #6b6b6b;
+  text-align: center;
+  line-height: 1.4;
+  max-width: 280px;
+}
+
 #app{display:none;flex-direction:column;height:100%}
 header{padding:8px;text-align:center}
 #words{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
@@ -43,12 +58,10 @@ display:flex;align-items:center;justify-content:center;font-weight:900;font-size
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
 #modal{background:#fffaf0;padding:30px;border-radius:20px;text-align:center;font-weight:900;max-width:300px;width:90%}
 
-/* Kontener mobilny */
 :root{--app-w:390px;--app-h:780px}
 body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 #shell{width:100%;max-width:var(--app-w);height:100vh;max-height:var(--app-h);margin:auto;background:inherit;overflow:hidden;position:relative}
 
-/* STRONA WYNIKÓW */
 #resultsScreen {
   display:none;
   flex-direction:column;
@@ -61,51 +74,42 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   border-radius:20px;
   margin:10px;
 }
-#resultsScreen h1 {
-  font-size:28px;
-  margin:0 0 30px;
-}
-#resultsScreen h2 {
-  font-size:22px;
-  margin:30px 0 10px;
-  color:#2563eb;
-}
-#resultsScreen p {
-  font-size:18px;
-  margin:8px 0;
-  font-weight:900;
-}
-#backToMenu {
-  margin-top:30px;
-  width:100%;
-  padding:16px;
-  font-size:19px;
-}
+#resultsScreen h1 {font-size:28px;margin:0 0 30px;}
+#resultsScreen h2 {font-size:22px;margin:30px 0 10px;color:#2563eb;}
+#resultsScreen p {font-size:18px;margin:8px 0;font-weight:900;}
+#backToMenu {margin-top:30px;width:100%;padding:16px;font-size:19px;}
 </style>
 </head>
 <body>
 <div id="shell">
 
-  <!-- MENU GŁÓWNE -->
   <div id="menu">
     <div class="card">
       <h1>🇵🇱 Gra Słówek</h1>
       <p>Wybierz rozmiar planszy:</p>
+      
       <div class="btnGrid">
         <button class="btnBig" data-size="5x6">5 × 6</button>
         <button class="btnBig" data-size="6x7">6 × 7</button>
       </div>
+
       <button class="btnBig" id="showResults" style="margin-top:20px; background:#10b981;">WYNIKI GRY</button>
+
+      <div class="extraBtns">
+        <button class="btnSmall danger" id="exitBtn">🚪 Wyjście</button>
+        <button class="btnSmall copy" id="copyLinkBtn">📋 Skopiuj adres gry</button>
+        <div class="copyTip">
+          ⚠️ Tip: najlepiej skopiować link i otworzyć w <b>Chrome</b> – wtedy można dodać grę na pulpit i śledzić rekordy.
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- GRA -->
   <div id="app">
     <header><div id="words"></div></header>
     <div id="board"></div>
     <footer>
       <div id="timer" style="--p:100%"><span id="time">60</span></div>
-
       <div style="display:flex;gap:8px">
         <button class="btn" onclick="goFullscreen()">⛶</button>
         <button class="btn" id="back">MENU</button>
@@ -113,7 +117,6 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     </footer>
   </div>
 
-  <!-- WYGRANA/PRZEGRANA -->
   <div id="overlay">
     <div id="modal">
       <div id="msg"></div><br><br>
@@ -121,7 +124,6 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     </div>
   </div>
 
-  <!-- STRONA WYNIKÓW -->
   <div id="resultsScreen">
     <h1>Wyniki Gry</h1>
     <div id="globalStats"></div>
@@ -160,6 +162,8 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   const globalStatsEl = document.getElementById("globalStats");
   const lastSessionStatsEl = document.getElementById("lastSessionStats");
   const todayStatsEl = document.getElementById("todayStats");
+  const exitBtn = document.getElementById("exitBtn");
+  const copyLinkBtn = document.getElementById("copyLinkBtn");
 
   let GAME = { rows: 6, cols: 5 };
   let words4 = [];
@@ -175,7 +179,6 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 
   let activeCount = Math.max(1, Math.min(4, Number(localStorage.getItem("ACTIVE_COUNT")) || 2));
 
-  // ===== DŹWIĘKI =====
   const clickSound = new Audio('sounds/click.mp3');
   const tickSound = new Audio('sounds/tick.mp3');
   const recordsMusic = new Audio('sounds/records_loop.mp3');
@@ -189,35 +192,37 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   fanfareSound.volume = 0.4;
   loseSound.volume = 0.8;
 
-  // Odblokowanie dźwięków na pierwszy click
   document.addEventListener('click', () => {
-    tickSound.play().then(() => {
-      tickSound.pause();
-      tickSound.currentTime = 0;
-    }).catch(() => {});
-    recordsMusic.play().then(() => {
-      recordsMusic.pause();
-      recordsMusic.currentTime = 0;
-    }).catch(() => {});
-    fanfareSound.play().then(() => {
-      fanfareSound.pause();
-      fanfareSound.currentTime = 0;
-    }).catch(() => {});
-    loseSound.play().then(() => {
-      loseSound.pause();
-      loseSound.currentTime = 0;
-    }).catch(() => {});
+    [tickSound, recordsMusic, fanfareSound, loseSound].forEach(a => {
+      a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
+    });
   }, { once: true });
 
-  // Dźwięk click na buttonach
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.btn, .btnBig')) {
+    if (e.target.closest('.btn, .btnBig, .btnSmall')) {
       clickSound.currentTime = 0;
       clickSound.play().catch(() => {});
     }
   });
 
-  // Statystyki
+  copyLinkBtn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(window.location.href);
+      copyLinkBtn.textContent = "✅ Skopiowano!";
+      setTimeout(() => { copyLinkBtn.textContent = "📋 Skopiuj adres gry"; }, 2000);
+    } catch (e) {
+      alert("Nie udało się skopiować adresu");
+    }
+  };
+
+  exitBtn.onclick = () => {
+    if (confirm("Czy na pewno chcesz wyjść z gry?")) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      }
+    }
+  };
+
   if (!localStorage.getItem("gameStats")) {
     localStorage.setItem("gameStats", JSON.stringify({
       startDate: new Date().toISOString().split('T')[0],
