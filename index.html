@@ -2,7 +2,7 @@
 <html lang="pl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, user-scalable=no">
 <title>Gra Słówek</title>
 <link rel="icon" href="favicon.ico">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -56,6 +56,14 @@ display:flex;align-items:center;justify-content:center;font-weight:900;font-size
 :root{--app-w:390px;--app-h:780px}
 body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 #shell{width:100%;max-width:var(--app-w);height:100vh;max-height:var(--app-h);margin:auto;background:inherit;overflow:hidden;position:relative}
+/* TELEFON */
+@media (max-width: 500px) {
+  #shell {
+    max-width: 100vw;
+    max-height: 100vh;
+  }
+}
+
 
 /* STRONA WYNIKÓW */
 #resultsScreen {
