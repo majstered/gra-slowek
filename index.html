@@ -14,33 +14,9 @@ background:radial-gradient(circle at top,#fff6d8,#f1deb0)}
 #menu{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:30px}
 .card{background:#fffaf0;padding:30px;border-radius:20px;box-shadow:0 10px 30px rgba(0,0,0,.15);text-align:center;font-weight:900;max-width:320px;width:90%}
 h1{margin:0 0 20px;font-size:28px}
-
-/* Nowe, ładne menu z index11 – ale bez transformów powodujących sztywność */
-.menuBtns{display:flex;flex-direction:column;gap:12px;margin-top:18px}
-.btnFlat{
-  width:100%;
-  padding:14px 18px;
-  border-radius:14px;
-  border:none;
-  background:#ffffffd9;
-  color:#1f2937;
-  font-size:16px;
-  font-weight:800;
-  cursor:pointer;
-  box-shadow:inset 0 0 0 1px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
-}
-.btnFlat:hover{background:#ffffff;}
-.btnFlat:active{background:#f0f0f0;}
-.btnFlat.small{font-size:15px;padding:12px 16px;font-weight:800}
-.btnFlat.danger{color:#b91c1c}
-
-.copyTip {
-  margin-top: 8px;
-  font-size: 13px;
-  color: #6b6b6b;
-  text-align: center;
-  line-height: 1.4;
-}
+.btnGrid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-top:20px}
+.btnBig{padding:18px;border-radius:16px;border:none;background:#2563eb;color:#fff;font-size:20px;font-weight:900;cursor:pointer;box-shadow:0 6px 15px rgba(37,99,235,.3)}
+.btnBig:active{transform:translateY(2px);box-shadow:0 3px 8px rgba(37,99,235,.3)}
 
 #app{display:none;flex-direction:column;height:100%}
 header{padding:8px;text-align:center}
@@ -67,12 +43,12 @@ display:flex;align-items:center;justify-content:center;font-weight:900;font-size
 #overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
 #modal{background:#fffaf0;padding:30px;border-radius:20px;text-align:center;font-weight:900;max-width:300px;width:90%}
 
-/* DOKŁADNIE TEN SAM KONTENER MOBILNY JAK W INDEX (3).HTML */
+/* Kontener mobilny */
 :root{--app-w:390px;--app-h:780px}
 body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 #shell{width:100%;max-width:var(--app-w);height:100vh;max-height:var(--app-h);margin:auto;background:inherit;overflow:hidden;position:relative}
 
-/* STRONA WYNIKÓW – bez zmian */
+/* STRONA WYNIKÓW */
 #resultsScreen {
   display:none;
   flex-direction:column;
@@ -85,37 +61,45 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   border-radius:20px;
   margin:10px;
 }
-#resultsScreen h1 {font-size:28px;margin:0 0 30px;}
-#resultsScreen h2 {font-size:22px;margin:30px 0 10px;color:#2563eb;}
-#resultsScreen p {font-size:18px;margin:8px 0;font-weight:900;}
-#backToMenu {margin-top:30px;width:100%;padding:16px;font-size:19px;}
+#resultsScreen h1 {
+  font-size:28px;
+  margin:0 0 30px;
+}
+#resultsScreen h2 {
+  font-size:22px;
+  margin:30px 0 10px;
+  color:#2563eb;
+}
+#resultsScreen p {
+  font-size:18px;
+  margin:8px 0;
+  font-weight:900;
+}
+#backToMenu {
+  margin-top:30px;
+  width:100%;
+  padding:16px;
+  font-size:19px;
+}
 </style>
 </head>
 <body>
 <div id="shell">
 
-  <!-- NOWE ŁADNE MENU Z INDEX11 -->
+  <!-- MENU GŁÓWNE -->
   <div id="menu">
     <div class="card">
       <h1>🇵🇱 Gra Słówek</h1>
       <p>Wybierz rozmiar planszy:</p>
-      
-      <div class="menuBtns">
-        <button class="btnFlat" data-size="5x6">Plansza 5 × 6</button>
-        <button class="btnFlat" data-size="6x7">Plansza 6 × 7</button>
-
-        <button class="btnFlat small" id="showResults">📊 Wyniki gry</button>
-
-        <button class="btnFlat small danger" id="exitBtn">🚪 Wyjście</button>
-        <button id="copyLinkBtn" class="btnFlat small">📋 Skopiuj adres gry</button>
-        <div class="copyTip">
-          ⚠️ Tip: najlepiej skopiować link i otworzyć w <b>Chrome</b> – wtedy można dodać grę na pulpit i śledzić swoje rekordy.
-        </div>
+      <div class="btnGrid">
+        <button class="btnBig" data-size="5x6">5 × 6</button>
+        <button class="btnBig" data-size="6x7">6 × 7</button>
       </div>
+      <button class="btnBig" id="showResults" style="margin-top:20px; background:#10b981;">WYNIKI GRY</button>
     </div>
   </div>
 
-  <!-- GRA – footer bez przycisków audio (jak w index3) -->
+  <!-- GRA -->
   <div id="app">
     <header><div id="words"></div></header>
     <div id="board"></div>
@@ -176,8 +160,6 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   const globalStatsEl = document.getElementById("globalStats");
   const lastSessionStatsEl = document.getElementById("lastSessionStats");
   const todayStatsEl = document.getElementById("todayStats");
-  const exitBtn = document.getElementById("exitBtn");
-  const copyLinkBtn = document.getElementById("copyLinkBtn");
 
   let GAME = { rows: 6, cols: 5 };
   let words4 = [];
@@ -193,7 +175,7 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 
   let activeCount = Math.max(1, Math.min(4, Number(localStorage.getItem("ACTIVE_COUNT")) || 2));
 
-  // Dźwięki (jak w index3)
+  // ===== DŹWIĘKI =====
   const clickSound = new Audio('sounds/click.mp3');
   const tickSound = new Audio('sounds/tick.mp3');
   const recordsMusic = new Audio('sounds/records_loop.mp3');
@@ -207,47 +189,48 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   fanfareSound.volume = 0.4;
   loseSound.volume = 0.8;
 
+  // Odblokowanie dźwięków na pierwszy click
   document.addEventListener('click', () => {
-    [tickSound, recordsMusic, fanfareSound, loseSound].forEach(a => {
-      a.play().then(() => { a.pause(); a.currentTime = 0; }).catch(() => {});
-    });
+    tickSound.play().then(() => {
+      tickSound.pause();
+      tickSound.currentTime = 0;
+    }).catch(() => {});
+    recordsMusic.play().then(() => {
+      recordsMusic.pause();
+      recordsMusic.currentTime = 0;
+    }).catch(() => {});
+    fanfareSound.play().then(() => {
+      fanfareSound.pause();
+      fanfareSound.currentTime = 0;
+    }).catch(() => {});
+    loseSound.play().then(() => {
+      loseSound.pause();
+      loseSound.currentTime = 0;
+    }).catch(() => {});
   }, { once: true });
 
+  // Dźwięk click na buttonach
   document.addEventListener('click', (e) => {
-    if (e.target.closest('.btn, .btnFlat')) {
+    if (e.target.closest('.btn, .btnBig')) {
       clickSound.currentTime = 0;
       clickSound.play().catch(() => {});
     }
   });
 
-  // Kopiuj link
-  copyLinkBtn.onclick = async () => {
-    try {
-      await navigator.clipboard.writeText(window.location.href);
-      copyLinkBtn.textContent = "✅ Skopiowano adres";
-      setTimeout(() => copyLinkBtn.textContent = "📋 Skopiuj adres gry", 1500);
-    } catch (e) {
-      alert("Nie udało się skopiować adresu");
-    }
-  };
-
-  // Wyjście – proste, bez logout screena
-  exitBtn.onclick = () => {
-    if (confirm("Czy na pewno chcesz wyjść z gry?")) {
-      if (document.fullscreenElement) document.exitFullscreen();
-    }
-  };
-
-  // Reszta kodu identyczna jak w index (3).html
+  // Statystyki
   if (!localStorage.getItem("gameStats")) {
-    localStorage.setItem("gameStats", JSON.stringify({startDate: new Date().toISOString().split('T')[0], stats: {}}));
+    localStorage.setItem("gameStats", JSON.stringify({
+      startDate: new Date().toISOString().split('T')[0],
+      stats: {}
+    }));
   }
 
   function updateStats(isWin) {
     const today = new Date().toISOString().split('T')[0];
     const stats = JSON.parse(localStorage.getItem("gameStats"));
     if (!stats.stats[today]) stats.stats[today] = { wins: 0, losses: 0 };
-    if (isWin) stats.stats[today].wins++; else stats.stats[today].losses++;
+    if (isWin) stats.stats[today].wins++;
+    else stats.stats[today].losses++;
     localStorage.setItem("gameStats", JSON.stringify(stats));
   }
 
