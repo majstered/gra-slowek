@@ -61,8 +61,7 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
 #resultsScreen {
   display:none;
   flex-direction:column;
-  height:100%;
-  padding:20px 20px;
+  padding:20px 20px 40px;
   box-sizing:border-box;
   overflow-y:auto;
   text-align:center;
@@ -70,6 +69,7 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   border-radius:20px;
   margin:10px;
 }
+
 #resultsScreen h1 {
   font-size:28px;
   margin:0 0 30px;
@@ -91,6 +91,29 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   font-size:19px;
 }
 
+/* EKRAN WYLOGOWANIA – idealnie na środku ekranu */
+#logoutScreen {
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 40px 30px;
+  text-align: center;
+  background: #fffaf0;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  max-width: 320px;
+  width: 90%;
+  margin: auto;
+  
+  /* NOWE – idealne centrowanie na całym ekranie */
+  position: fixed;     /* <-- kluczowe */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 100;        /* na wierzchu */
+}
 /* ===== NOWOCZESNE MENU (FINAL) ===== */
 .menuBtns{display:flex;flex-direction:column;gap:12px;margin-top:18px}
 .btnFlat{
@@ -130,6 +153,35 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
   line-height: 1.4;
 }
 
+.audioBtn {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 4px !important;
+  margin: 0 4px;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.audioBtn:hover,
+.audioBtn:active {
+  background: none !important;
+  transform: none !important;
+}
+
+.audioBtn.off {
+  opacity: 0.35;
+}
+
+.resultsCongrats{
+  text-align:center;
+  font-weight:800;
+  margin-top: 30px;
+  margin-bottom: 18px;
+}
+
+
 </style>
 </head>
 <body>
@@ -168,10 +220,10 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
         <div id="timer" style="--p:100%"><span id="time">60</span></div>
 
         <!-- TYKANIE ZEGARA -->
-        <button class="iconBtn" id="toggleTick" title="Tykanie zegara">🎵</button>
+        <button class="iconBtn audioBtn" id="toggleTick" title="Tykanie zegara">🕒</button>
 
         <!-- WSZYSTKIE DŹWIĘKI -->
-        <button class="iconBtn" id="toggleSound" title="Dźwięki">🎶</button>
+        <button class="iconBtn audioBtn" id="toggleSound" title="Dźwięki">🎵</button>
       </div>
 
       <div style="display:flex;gap:8px">
@@ -196,26 +248,16 @@ body{display:flex;align-items:center;justify-content:center;background:#d9cfae}
     <div id="lastSessionStats"></div>
     <div id="todayStats"></div>
     <button class="btn" id="backToMenu">POWRÓT DO MENU</button>
+    <div class="resultsCongrats">
+     GRATULACJE WYNIKÓW !!!
+    </div>
+  
   </div>
 
-  <!-- NOWE: EKRAN WYLOGOWANIA -->
-  <div id="logoutScreen" style="
-    display:none;
-    flex-direction:column;
-    justify-content:center;
-    align-items:center;
-    height:100%;
-    padding:30px;
-    text-align:center;
-    background:#fffaf0;
-    border-radius:20px;
-    margin:10px;
-    font-weight:900;
-  ">
+  <div id="logoutScreen">
     <h1 style="font-size:26px;margin:0 0 20px;">👋 Zostałeś wylogowany</h1>
 
     <p style="font-size:18px;line-height:1.5;margin:0;">
-      Zostałeś wylogowany z gry.<br><br>
       Możesz teraz <strong>bezpiecznie zamknąć przeglądarkę</strong><br>
       i powrócić kiedy tylko chcesz.
     </p>
@@ -313,11 +355,11 @@ function syncAudioFlags() {
 
 function renderAudioButtons() {
   // tick
-  toggleTickBtn.textContent = tickOn ? "🎵" : "🚫🎵";
+  toggleTickBtn.textContent = tickOn ? "🕒" : "🚫";
   toggleTickBtn.classList.toggle("off", !tickOn || !soundOn);
 
   // global
-  toggleSoundBtn.textContent = soundOn ? "🎶" : "🚫🎶";
+  toggleSoundBtn.textContent = soundOn ? "🎵" : "🚫";
   toggleSoundBtn.classList.toggle("off", !soundOn);
 }
 
